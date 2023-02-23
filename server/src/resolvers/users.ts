@@ -2,9 +2,7 @@ import {Resolver, Ctx, Mutation, Arg, InputType, Field, ObjectType ,Query} from 
 import * as argon2 from "argon2";
 import {myContext} from "../types";
 import {User} from "../../entities/User";
-import {createAccessToken, createRefreshToken} from "../auth/auth";
-import {sendRefreshToken} from "../auth/sendRefreshToken";
-import {verify} from "jsonwebtoken";
+
 
 @InputType()
 class UsernamePasswordInput {
@@ -34,18 +32,10 @@ class UserResponse {
 export class UsersResolver {
     @Query(() => User, { nullable: true })
     async me(@Ctx() { em, req }: myContext) {
-        const authorization = req.headers["authorization"];
-        console.log(authorization)
-        if (!authorization) {
+        if (!req.session.userId) {
             return null;
         }
-        const token = authorization.split(" ")[1];
-        const payload: any = verify(token, process.env.ACCESS_TOKEN_SECRET!);
-        const user = await em.getRepository(User).findOne({username: payload.userId})
-        if ( !user ) {
-            console.log('err');
-            return null;
-        } else return { user }
+        return await em.getRepository(User).findOne({id: req.session.userId})
     }
     @Mutation(() => UserResponse )
     async register(
@@ -91,7 +81,7 @@ export class UsersResolver {
     @Mutation(() => UserResponse)
     async login(
         @Arg('options')  options: UsernamePasswordInput,
-        @Ctx() {em, res}: myContext
+        @Ctx() {em, req}: myContext
     ) {
         const user = await em.getRepository(User).findOne({username: options.username})
         if (!user) {
@@ -111,9 +101,8 @@ export class UsersResolver {
                 }]
             }
         }
-        sendRefreshToken(res, createRefreshToken(user));
+        req.session.userId = user.id;
         return {
-            accessToken: createAccessToken(user),
             user
         };
     }

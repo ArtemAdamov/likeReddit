@@ -6,12 +6,10 @@ import {buildSchema} from "type-graphql";
 import {UsersResolver} from "./resolvers/users";
 import {PostsResolver} from "./resolvers/posts";
 import {__prod__} from "../entities/constants";
-import { verify } from "jsonwebtoken";
-import {User} from "../entities/User";
-import { sendRefreshToken } from "./auth/sendRefreshToken";
-import { createAccessToken, createRefreshToken } from "./auth/auth";
-
+import session from "express-session";
+import connectRedis from "connect-redis";
 // import cors from "cors";
+import Redis from "ioredis";
 
 const main = async () => {
     const orm = await MikroORM.init(microOrmConfig);
@@ -27,32 +25,29 @@ const main = async () => {
     //     })
     // );
 
-    app.post("/refresh_token", async (req, res) => {
-        const token = req.cookies.jid;
-        if (!token) {
-            return res.send({ ok: false, accessToken: "" });
-        }
+    const RedisStore = connectRedis(session);
+    const redisClient = new Redis()
 
-        let payload: any = null;
-        try {
-            payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
-        } catch (err) {
-            console.log(err);
-            return res.send({ ok: false, accessToken: "" });
-        }
-
-        // token is valid, and
-        // we can send back an access token
-        const user = await orm.em.fork().getRepository(User).findOne({id: payload.userId})
-
-        if (!user) {
-            return res.send({ ok: false, accessToken: "" });
-        }
-
-        sendRefreshToken(res, createRefreshToken(user));
-
-        return res.send({ ok: true, accessToken: createAccessToken(user) });
-    });
+    app.use(
+        session({
+            name: "redq",
+            store: new RedisStore({
+                client: redisClient,
+                disableTouch: true,
+            }),
+            cookie: {
+                maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+                httpOnly: true,
+                // sameSite: "lax", // csrf
+                sameSite: "none", // csrf
+                // secure: __prod__, // cookie only works in https
+                secure: false, // cookie only works in https
+            },
+            saveUninitialized: false,
+            secret: 'process.env.SESSION_SECRET',
+            resave: false,
+        })
+    );
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
