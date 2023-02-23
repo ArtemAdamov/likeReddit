@@ -1,0 +1,7 @@
+/server/node_modules
+/web/node_modules
+/server/dist
+/server/yarn-error.log
+/server/.idea
+/web/.next
+/web/next-env.d.ts
