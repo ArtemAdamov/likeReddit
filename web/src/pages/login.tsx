@@ -1,12 +1,14 @@
 import React from "react";
 import { Field, Form, Formik } from 'formik';
-import {Button, Container, FormControl, FormErrorMessage, FormLabel, Input} from "@chakra-ui/react";
+import {Box, Button, Container, Flex, FormControl, FormErrorMessage, FormLabel, Input, Link} from "@chakra-ui/react";
 import {Wrapper} from "../components/Wrapper";
 import {InputFiled} from "../components/InputFileds";
-import {useMutation} from "urql";
 import {useLoginMutation} from "../generated/graphql";
 import {toErrorMap} from "../utils/toErrorMap";
 import {useRouter} from "next/router";
+import {withUrqlClient} from "next-urql";
+import {createUrqlClient} from "../utils/createUrqlClient";
+import NextLink from "next/link";
 
 
 interface loginProps {
@@ -19,14 +21,11 @@ const Login: React.FC<loginProps> = ({}) => {
     return (
         <Wrapper variant={"small"}>
             <Formik
-                initialValues={{username: "", password: ""}}
+                initialValues={{usernameOrEmail: "", password: ""}}
                 onSubmit={ async (values, {setErrors}) => {
                     const response = await login(
                         {
-                            "options": {
-                                "username": values.username,
-                                "password": values.password
-                            }
+                            usernameOrEmail: values.usernameOrEmail, password: values.password
                         })
                     if (response.data?.login.errors) {
                         setErrors(toErrorMap(response.data.login.errors));
@@ -39,7 +38,7 @@ const Login: React.FC<loginProps> = ({}) => {
                     <Form>
                         <Field name='name' validate={''}>
                             {({field, form}) => (
-                                <InputFiled name={"username"} placeholder={"username"} label={'Username'} />
+                                <InputFiled name={"usernameOrEmail"} placeholder={"usernameOrEmail"} label={'username or Email'} />
                             )}
                         </Field>
                         <Field name='password' validate={''}>
@@ -47,7 +46,8 @@ const Login: React.FC<loginProps> = ({}) => {
                                 <InputFiled name={"password"} type={'password'} placeholder={"password"} label={'Password'} />
                             )}
                         </Field>
-
+                        <Flex mt={4} ><NextLink href={"/forgot-password"} ><Link>Forgot my
+                            password</Link></NextLink></Flex>
                         <Button
                             mt={4}
                             colorScheme='teal'
@@ -63,4 +63,4 @@ const Login: React.FC<loginProps> = ({}) => {
     )
 }
 
-export default Login
+export default withUrqlClient(createUrqlClient)(Login)

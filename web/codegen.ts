@@ -1,4 +1,3 @@
-
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
@@ -7,8 +6,8 @@ const config: CodegenConfig = {
   documents: "src/graphql/**/*.graphql",
   generates: {
     "src/generated/": {
-      preset: "client",
-      plugins: ["typescript-urql"
+        preset: "client",
+        plugins: ["typescript-urql"
       ],
     }
   }

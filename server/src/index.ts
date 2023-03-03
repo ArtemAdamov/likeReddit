@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {MikroORM} from "@mikro-orm/core";
 import microOrmConfig from "./mikro-orm.config";
 import express from "express";
@@ -5,34 +6,51 @@ import {ApolloServer} from "apollo-server-express";
 import {buildSchema} from "type-graphql";
 import {UsersResolver} from "./resolvers/users";
 import {PostsResolver} from "./resolvers/posts";
-import {__prod__} from "../entities/constants";
+import {__prod__, COOKIE_NAME, PostgreDbUserPassword} from "../entities/constants";
 import session from "express-session";
 import connectRedis from "connect-redis";
-// import cors from "cors";
+import cors from "cors";
 import Redis from "ioredis";
 
+import {DataSource} from "typeorm";
+import {Post} from "../entities/Post";
+import {User} from "../entities/User";
+// import {sendEmail} from "./utils/sendEmails";
+
 const main = async () => {
+    // sendEmail('hello there')
+    const myDataSource = new DataSource({
+        type: "postgres",
+        database: "pgcrypto2",
+        username: "postgres",
+        password: PostgreDbUserPassword,
+        synchronize: true,
+        logging: true,
+        entities: [Post, User]
+    })
+    await myDataSource.connect()
     const orm = await MikroORM.init(microOrmConfig);
+
     await orm.getMigrator().up();
     const app = express();
 
     app.set("trust proxy", 1);
-    // app.use(
-    //     cors({
-    //         // origin: 'http://localhost:3001',
-    //         origin: 'https://studio.apollographql.com',
-    //         credentials: true,
-    //     })
-    // );
+    app.use(
+        cors({
+            origin: 'http://localhost:3001',
+            // origin: 'https://studio.apollographql.com',
+            credentials: true,
+        })
+    );
 
     const RedisStore = connectRedis(session);
-    const redisClient = new Redis()
+    const redis = new Redis()
 
     app.use(
         session({
-            name: "redq",
+            name: COOKIE_NAME,
             store: new RedisStore({
-                client: redisClient,
+                client: redis,
                 disableTouch: true,
             }),
             cookie: {
@@ -55,16 +73,18 @@ const main = async () => {
             validate: false,
 
         }),
-        context: ({req, res}) => ({em : orm.em.fork(), req, res})
+        // context: ({req, res}) => ({em : orm.em.fork(), req, res, redis})
+        context: ({req, res}) => ({ req, res, redis})
     })
 
     await apolloServer.start();
     apolloServer.applyMiddleware({
-        app, cors: {
-            // origin: 'http://localhost:3001',
-            origin: 'https://studio.apollographql.com',
-            credentials: true,
-        }
+        // // to work with graqhl apollo
+        // app, cors: {
+        //     origin: 'https://studio.apollographql.com',
+        //     credentials: true,
+        // }
+        app, cors: false
     })
 
     app.listen(3000, () => {

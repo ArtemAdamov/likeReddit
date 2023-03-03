@@ -1,0 +1,4 @@
+fragment UserRegular on User {
+    id
+    username
+}
