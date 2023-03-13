@@ -2,12 +2,13 @@ import {NavBar} from "../components/NavBar";
 import {withUrqlClient} from "next-urql";
 import {createUrqlClient} from "../utils/createUrqlClient";
 import {Wrapper} from "../components/Wrapper";
+import Link from "next/link"
 
 
 const Index = () => (
     <Wrapper>
       <NavBar/>
-      <div>Welcome</div>
+        <Link href={"create-post"}>Create post</Link>
     </Wrapper>
 )
 

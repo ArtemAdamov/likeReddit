@@ -1,6 +1,15 @@
 // import {Entity, PrimaryKey, Property} from "@mikro-orm/core";
 import {Field, Int, ObjectType} from "type-graphql";
-import {BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {
+    BaseEntity,
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn
+} from "typeorm";
+import {Post} from "./Post";
 @ObjectType()
 @Entity()
 export class User extends BaseEntity{
@@ -18,6 +27,9 @@ export class User extends BaseEntity{
 
     @Column({type: "text"})
     password!: string;
+
+    @OneToMany(() => Post, (post) => post.creator)
+    posts: Post[]
 
     @Field()
     @CreateDateColumn({type: "date"})

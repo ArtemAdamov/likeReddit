@@ -1,6 +1,4 @@
 import "reflect-metadata";
-import {MikroORM} from "@mikro-orm/core";
-import microOrmConfig from "./mikro-orm.config";
 import express from "express";
 import {ApolloServer} from "apollo-server-express";
 import {buildSchema} from "type-graphql";
@@ -19,20 +17,18 @@ import {User} from "../entities/User";
 
 const main = async () => {
     // sendEmail('hello there')
+    const app = express();
     const myDataSource = new DataSource({
         type: "postgres",
-        database: "pgcrypto2",
+        database: "pgcryptos",
         username: "postgres",
         password: PostgreDbUserPassword,
         synchronize: true,
         logging: true,
         entities: [Post, User]
     })
-    await myDataSource.connect()
-    const orm = await MikroORM.init(microOrmConfig);
 
-    await orm.getMigrator().up();
-    const app = express();
+    await myDataSource.initialize()
 
     app.set("trust proxy", 1);
     app.use(
@@ -73,8 +69,7 @@ const main = async () => {
             validate: false,
 
         }),
-        // context: ({req, res}) => ({em : orm.em.fork(), req, res, redis})
-        context: ({req, res}) => ({ req, res, redis})
+        context: ({req, res}) => ({ myDataSource, req, res, redis})
     })
 
     await apolloServer.start();
