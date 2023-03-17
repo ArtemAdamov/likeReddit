@@ -9,7 +9,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 import Redis from "ioredis";
-
+import path from 'path';
 import {DataSource} from "typeorm";
 import {Post} from "../entities/Post";
 import {User} from "../entities/User";
@@ -25,11 +25,13 @@ const main = async () => {
         password: PostgreDbUserPassword,
         synchronize: true,
         logging: true,
+        migrations: [path.join(__dirname, './migrations/*')],
         entities: [Post, User]
     })
 
     await myDataSource.initialize()
-
+    // await Post.delete({})
+    // await myDataSource.runMigrations();
     app.set("trust proxy", 1);
     app.use(
         cors({
@@ -52,8 +54,8 @@ const main = async () => {
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
                 httpOnly: true,
-                // sameSite: "lax", // csrf
-                sameSite: "none", // csrf
+                sameSite: "lax", // csrf
+                // sameSite: "none", // csrf
                 // secure: __prod__, // cookie only works in https
                 secure: false, // cookie only works in https
             },

@@ -28,14 +28,14 @@ export class Post extends BaseEntity{
     @Field(() => Int)
     @Column()
     creatorId: number;
+    @Field(() => User)
     @ManyToOne(() => User, (user) => user.posts)
     creator: User
-    @Field()
-    @CreateDateColumn({type: "date"})
+    @Field(() => String)
+    @CreateDateColumn()
     createdAt: Date;
-
-    @Field()
-    @UpdateDateColumn({ type: "date"})
+    @Field(() => String)
+    @UpdateDateColumn()
         // @CreateDateColumn({ type: "date", onUpdate: () => new Date() })
     updatedAt: Date;
 }

@@ -20,7 +20,7 @@ const CreatePost: React.FC<{}> = ({}) => {
     const [{data, fetching}] = useMeQuery();
     useEffect(() => {
         if (!fetching && !data?.me) {
-            router.replace("/login")
+            router.replace("/login?next=" + router.pathname)
         }
     }, [fetching, data, router])
     const [, createPost] = useCreatePostMutation();

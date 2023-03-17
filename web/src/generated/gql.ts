@@ -15,6 +15,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 const documents = {
     "fragment UserRegular on User {\n  id\n  username\n}": types.UserRegularFragmentDoc,
     "query Me {\n  me {\n    ...UserRegular\n  }\n}": types.MeDocument,
+    "query Posts($limit: Int!, $cursor: String) {\n  posts(limit: $limit, cursor: $cursor) {\n    hasMore\n    posts {\n      id\n      title\n      text\n      createdAt\n      textSnippet\n    }\n  }\n}": types.PostsDocument,
     "mutation changePassword($token: String!, $newPassword: String!) {\n  changePassword(token: $token, newPassword: $newPassword) {\n    errors {\n      message\n      field\n    }\n    user {\n      ...UserRegular\n    }\n  }\n}": types.ChangePasswordDocument,
     "mutation createPost($input: PostInput!) {\n  createPost(input: $input) {\n    text\n    title\n    creatorId\n  }\n}": types.CreatePostDocument,
     "mutation ForgotPassword($email: String!) {\n  forgotPassword(email: $email)\n}": types.ForgotPasswordDocument,
@@ -45,6 +46,10 @@ export function graphql(source: "fragment UserRegular on User {\n  id\n  usernam
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "query Me {\n  me {\n    ...UserRegular\n  }\n}"): (typeof documents)["query Me {\n  me {\n    ...UserRegular\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "query Posts($limit: Int!, $cursor: String) {\n  posts(limit: $limit, cursor: $cursor) {\n    hasMore\n    posts {\n      id\n      title\n      text\n      createdAt\n      textSnippet\n    }\n  }\n}"): (typeof documents)["query Posts($limit: Int!, $cursor: String) {\n  posts(limit: $limit, cursor: $cursor) {\n    hasMore\n    posts {\n      id\n      title\n      text\n      createdAt\n      textSnippet\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
