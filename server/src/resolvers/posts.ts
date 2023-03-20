@@ -100,9 +100,9 @@ export class PostsResolver {
     }
     @Query(() => Post)
     post(
-        @Arg("id") id: number,
+        @Arg("id", () => Int) id: number,
     ): Promise<Post | null> {
-        return Post.findOne({where: {id}});
+        return Post.findOne({where: {id}, relations: ["creator"]});
     }
 
     @Mutation(() => Post)
