@@ -1,6 +1,6 @@
 import React from "react";
 import { Field, Form, Formik } from 'formik';
-import {Box, Button, Container, Flex, FormControl, FormErrorMessage, FormLabel, Input, Link} from "@chakra-ui/react";
+import {Button, Flex, Link} from "@chakra-ui/react";
 import {Wrapper} from "../components/Wrapper";
 import {InputFiled} from "../components/InputFileds";
 import {useLoginMutation} from "../generated/graphql";
@@ -10,12 +10,7 @@ import {withUrqlClient} from "next-urql";
 import {createUrqlClient} from "../utils/createUrqlClient";
 import NextLink from "next/link";
 
-
-interface loginProps {
-
-}
-
-const Login: React.FC<loginProps> = ({}) => {
+const Login: React.FC = ({}) => {
     const router = useRouter();
     const [, login] = useLoginMutation();
     return (
@@ -30,9 +25,7 @@ const Login: React.FC<loginProps> = ({}) => {
                     if (response.data?.login.errors) {
                         setErrors(toErrorMap(response.data.login.errors));
                     } else if(response.data?.login.user) {
-                        console.log('Hell', router.query.next)
                         if (typeof router.query.next === "string") {
-                            console.log('here')
                             await router.push(router.query.next)
                         }
                         await router.push("/");
@@ -51,8 +44,9 @@ const Login: React.FC<loginProps> = ({}) => {
                                 <InputFiled name={"password"} type={'password'} placeholder={"password"} label={'Password'} />
                             )}
                         </Field>
-                        <Flex mt={4} ><NextLink href={"/forgot-password"} ><Link>Forgot my
-                            password</Link></NextLink></Flex>
+                        <Flex mt={4} >
+                            <Link href={"/forgot-password"}>Forgot my password</Link>
+                        </Flex>
                         <Button
                             mt={4}
                             colorScheme='teal'

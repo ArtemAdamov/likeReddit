@@ -50,7 +50,7 @@ export const cursorPagination = (): Resolver => {
     };
 };
 export const createUrqlClient = (ssrExchange: any) => ({
-    url: 'http://localhost:3000/graphql',
+    url: process.env.NEXT_PUBLIC_API_URL as string,
     exchanges: [dedupExchange, cacheExchange({
         keys: {
             PaginatedPosts: () => null,

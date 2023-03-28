@@ -1,48 +1,35 @@
 import "reflect-metadata";
+import "dotenv-safe/config";
 import express from "express";
 import {ApolloServer} from "apollo-server-express";
 import {buildSchema} from "type-graphql";
 import {UsersResolver} from "./resolvers/users";
 import {PostsResolver} from "./resolvers/posts";
-import {__prod__, COOKIE_NAME, PostgreDbUserPassword} from "../entities/constants";
+import {__prod__, COOKIE_NAME} from "../entities/constants";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 import Redis from "ioredis";
-import path from 'path';
-import {DataSource} from "typeorm";
-import {Post} from "../entities/Post";
-import {User} from "../entities/User";
+import myDataSource from "./dataSource";
 // import {sendEmail} from "./utils/sendEmails";
 
 const main = async () => {
     // sendEmail('hello there')
     const app = express();
-    const myDataSource = new DataSource({
-        type: "postgres",
-        database: "pgcryptos",
-        username: "postgres",
-        password: PostgreDbUserPassword,
-        synchronize: true,
-        logging: true,
-        migrations: [path.join(__dirname, './migrations/*')],
-        entities: [Post, User]
-    })
-
     await myDataSource.initialize()
     // await Post.delete({})
     // await myDataSource.runMigrations();
     app.set("trust proxy", 1);
     app.use(
         cors({
-            origin: 'http://localhost:3001',
+            origin: process.env.CORS_ORIGIN,
             // origin: 'https://studio.apollographql.com',
             credentials: true,
         })
     );
-
+    const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
     const RedisStore = connectRedis(session);
-    const redis = new Redis()
+    const redis = new Redis(redisUrl)
 
     app.use(
         session({
@@ -56,11 +43,11 @@ const main = async () => {
                 httpOnly: true,
                 sameSite: "lax", // csrf
                 // sameSite: "none", // csrf
-                // secure: __prod__, // cookie only works in https
-                secure: false, // cookie only works in https
+                secure: __prod__, // cookie only works in https
+                // secure: false, // cookie only works in https
             },
             saveUninitialized: false,
-            secret: 'process.env.SESSION_SECRET',
+            secret: process.env.SESSION_SECRET,
             resave: false,
         })
     );
@@ -84,7 +71,7 @@ const main = async () => {
         app, cors: false
     })
 
-    app.listen(3000, () => {
+    app.listen(parseInt(process.env.PORT), () => {
         console.log('server started on port 3000')
     })
 };

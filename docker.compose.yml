@@ -1,0 +1,9 @@
+version: '3'
+services:
+  your_app:
+    image: artemadamov/cryplet:1
+    ports:
+      - "80:80"
+    environment:
+      - DATABASE_URL=postgres://postgres:0412@localhost:5432/pgcryptos
+  # Добавьте другие контейнеры, такие как база данных, если это необходимо

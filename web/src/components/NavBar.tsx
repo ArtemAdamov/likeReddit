@@ -20,11 +20,11 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
                 <Link href={'/register'} color='white'>Register</Link>
             </Box>
         )
-    } else { // @ts-ignore
+    } else {
         body = (
                 <Flex ml={'auto'}>{
                     data.me.username}
-                    <Button onClick={() => {logout();}} isLoading={logoutFetching} ml={'1'} variant={"link"}>logout</Button>
+                    <Button onClick={() => {logout({},{});}} isLoading={logoutFetching} ml={'1'} variant={"link"}>logout</Button>
                 </Flex>
             )
     }

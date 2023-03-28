@@ -45,7 +45,7 @@ const Post = ({}) => {
                 <Box mb={4}>{data.post.text}</Box>
             </Flex>
         </Wrapper>
-
     );
+
 };
 export default withUrqlClient(createUrqlClient, {ssr: true})(Post)
