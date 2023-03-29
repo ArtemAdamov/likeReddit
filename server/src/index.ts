@@ -72,7 +72,7 @@ const main = async () => {
     })
 
     app.listen(parseInt(process.env.PORT), () => {
-        console.log('server started on port 3000')
+        console.log('server started on port ' + process.env.PORT)
     })
 };
 main().catch(err => {
